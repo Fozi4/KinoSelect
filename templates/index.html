@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Movie</title>
-    <link rel="stylesheet" href="css/styles.css" />
+    <link
+      rel="stylesheet"
+      href="{{  url_for('static', filename='css/styles.css')  }}"
+    />
     <link
       href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap"
       rel="stylesheet"
@@ -16,9 +19,9 @@
         <div class="kino-select"><a href="index.html">KinoSelect</a></div>
         <ul class="nav-links">
           <li><a href="#films-of-the-day">Films of the day</a></li>
-          <li><a href="pages/contact.html">Contact</a></li>
-          <li><a href="pages/login.html">Log In</a></li>
-          <li><a href="pages/signup.html">Sign up</a></li>
+          <li><a href="contact.html">Contact</a></li>
+          <li><a href="login.html">Log In</a></li>
+          <li><a href="signup.html">Sign up</a></li>
         </ul>
       </nav>
       <div class="hero-content">
@@ -31,22 +34,34 @@
       <h2>Films of the Day</h2>
       <div class="film-grid">
         <div class="film-card">
-          <img src="images/minecraftFilm.jpg" alt="Film 1" />
+          <img
+            src="{{ url_for('static', filename='images/minecraftFilm.jpg')  }}"
+            alt="Film 1"
+          />
           <h3>A Minecraft Movie</h3>
           <button class="buy-button">Buy Ticket</button>
         </div>
         <div class="film-card">
-          <img src="images/StarWarsEP3.jpg" alt="Film 2" />
+          <img
+            src="{{ url_for('static', filename='images/StarWarsEP3.jpg')  }}"
+            alt="Film 2"
+          />
           <h3>Star Wars Episode III - Revenge Of the Sith</h3>
           <button class="buy-button">Buy Ticket</button>
         </div>
         <div class="film-card">
-          <img src="images/UntilDawnFilm.jpeg" alt="Film 3" />
+          <img
+            src="{{  url_for('static', filename='images/UntilDawnFilm.jpeg')  }}"
+            alt="Film 3"
+          />
           <h3>Until Dawn</h3>
           <button class="buy-button">Buy Ticket</button>
         </div>
         <div class="film-card">
-          <img src="images/Mickey17Film.png" alt="Film 4" />
+          <img
+            src="{{  url_for('static', filename='images/Mickey17Film.png')  }}"
+            alt="Film 4"
+          />
           <h3>Mickey 17</h3>
           <button class="buy-button">Buy Ticket</button>
         </div>
