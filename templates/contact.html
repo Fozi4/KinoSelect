@@ -9,11 +9,10 @@
   <body>
     <header class="main-page">
         <nav class="navbar">
-          <div class="kino-select"><a href="index.html">KinoSelect</a></div>
+          <div class="kino-select"><a href="{{url_for('home')}}">KinoSelect</a></div>
           <ul class="nav-links">
-            <li><a href="index.html#films-of-the-day">Films of the day</a></li>
-            <li><a href="login.html">Log In</a></li>
-            <li><a href="signup.html">Sign up</a></li>
+            <li><a href="{{url_for('login')}}">Log In</a></li>
+            <li><a href="{{url_for('signup')}}">Sign up</a></li>
           </ul>
         </nav>
         <div class="contact-container">
@@ -27,7 +26,7 @@
                 <p><strong>fakeemail@gmail.com</strong></p>
             </div>
           <div class="contact-image">
-            <img src="{{  url_for('static', filename='images/contact-image.jpg' )  }}" alt="">
+            <img src="{{  url_for('static', filename='images/contactImage.jpg' )  }}" alt="">
           </div>
         </div>
     </body>
