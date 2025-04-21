@@ -12,6 +12,13 @@ class User(db.Model):
     fullname = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
+    
+class Movie(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(100), nullable=False)
+    cinema = db.Column(db.String(100), nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    image = db.Column(db.String(200))  # шлях до картинки
 
     def __repr__(self):
         return f'<User {self.email}>'
@@ -60,6 +67,17 @@ def login():
 def contact():
     return render_template('contact.html')
 
+@app.route('/movies')
+def movies():
+    sort_by = request.args.get('sort', 'title')  # сортування за замовчуванням
+    if sort_by == 'price':
+        movie_list = Movie.query.order_by(Movie.price).all()
+    elif sort_by == 'title':
+        movie_list = Movie.query.order_by(Movie.title).all()
+    else:
+        movie_list = Movie.query.all()
+    return render_template('movies.html', movies=movie_list)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
@@ -67,3 +85,11 @@ if __name__ == '__main__':
 
 # with app.app_context():
     # db.create_all()
+
+    def __repr__(self):
+        return f'<Movie {self.title}>'
+
+with app.app_context():
+    db.create_all()
+
+

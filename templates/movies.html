@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Movie Selection</title>
+  <link
+      rel="stylesheet"
+      href="{{  url_for('static', filename='css/moviesStyles.css')  }}"
+    />
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/movies.css') }}">
+</head>
+<body>
+  <h1>Available Movies</h1>
+
+  <div class="sort-options">
+    <a href="{{ url_for('movies', sort='price') }}">Sort by Price</a> |
+    <a href="{{ url_for('movies', sort='title') }}">Sort by Title</a>
+  </div>
+
+  <div class="movie-list">
+    {% for movie in movies %}
+      <div class="movie-card">
+        <img src="{{ url_for('static', filename='images/' + movie.image) }}" alt="{{ movie.title }}">
+        <h3>{{ movie.title }}</h3>
+        <p>Cinema: {{ movie.cinema }}</p>
+        <p>Price: {{ movie.price }}₴</p>
+        <button class="buy-button">Buy Ticket</button>
+      </div>
+    {% endfor %}
+  </div>
+</body>
+</html>
