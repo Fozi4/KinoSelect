@@ -70,3 +70,7 @@ body {
   height: auto;
   border-radius: 10px;
 }
+
+.nav-links span{
+  color:#00bfff;
+}

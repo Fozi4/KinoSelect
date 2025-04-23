@@ -1,12 +1,19 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import current_user, UserMixin, LoginManager, login_required, logout_user, login_user
-from werkzeug.security import check_password_hash
+from werkzeug.security import check_password_hash, generate_password_hash
 from flask_bcrypt import bcrypt
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
 app = Flask(__name__)
+app.secret_key = os.getenv("SECRET_KEY") or 'dev-secret-key'
+app.config['SESSION_PERMANENT'] = False
+print("SECRET_KEY = ", os.getenv("SECRET_KEY"))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 db = SQLAlchemy(app)
+
 
 
 class User(db.Model, UserMixin):
@@ -15,6 +22,9 @@ class User(db.Model, UserMixin):
     fullname = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
+    
+    def __repr__(self):
+        return f'<User {self.email}>'
 
 
 class Movie(db.Model):
@@ -24,15 +34,14 @@ class Movie(db.Model):
     price = db.Column(db.Float, nullable=False)
     image = db.Column(db.String(200))
     description = db.Column(db.Text, nullable=True)
-
+    
     def __repr__(self):
-        return f'<User {self.email}>'
+        return f'<Movie {self.title}>'
 
 
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
-
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -52,7 +61,8 @@ def signup():
         password = request.form.get('password')
 
         if fullname and email and password:
-            new_user = User(fullname=fullname, email=email, password=password)
+            hashed_password = generate_password_hash(password)
+            new_user = User(fullname=fullname, email=email, password=hashed_password)
             db.session.add(new_user)
             db.session.commit()
             print("Form data:", request.form)
@@ -72,6 +82,7 @@ def login():
 
         if user and check_password_hash(user.password, password):
             login_user(user)
+            print("LOGGED IN:", current_user.is_authenticated)
             return redirect(url_for('home'))
         else:
             flash('Invalid email or password', 'danger')
@@ -126,16 +137,18 @@ def reserve_ticket(movie_id):
     return redirect(url_for('home'))  # або показати підтвердження
 
 
+#with app.app_context():
+   # User.query.delete()
+    #db.session.commit()
+    #print("Всі користувачі видалені.")
+
+
 if __name__ == '__main__':
     app.run(debug=True)
 
 
 # with app.app_context():
     # db.create_all()
-
-
-    def __repr__(self):
-        return f'<Movie {self.title}>'
 
 
 # with app.app_context():

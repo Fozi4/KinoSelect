@@ -165,3 +165,7 @@ body {
 .buy-button:hover {
   background-color: #009acf;
 }
+
+.nav-links span{
+  color:#00bfff;
+}

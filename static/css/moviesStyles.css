@@ -91,6 +91,9 @@ body h1 {
   gap: 20px;
 }
 
+.nav-links span{
+  color:#00bfff;
+}
 .nav-links a {
   color: #00bfff;
   text-decoration: none;
