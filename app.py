@@ -2,7 +2,6 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import current_user, UserMixin, LoginManager, login_required, logout_user, login_user
 from werkzeug.security import check_password_hash, generate_password_hash
-from flask_bcrypt import bcrypt
 from dotenv import load_dotenv
 import os
 
@@ -131,8 +130,9 @@ def movieDetails(movie_id):
 def reserve_ticket(movie_id):
     name = request.form.get('name')
     seat = request.form.get('seat')
+    row = request.form.get('row')
     # Тут можна зберігати в базу або просто вивести
-    print(f'{name} забронював(ла) місце {seat} на фільм з ID {movie_id}')
+    print(f'{name} забронював(ла) місце {seat} ряд {row} на фільм з ID {movie_id}')
     return redirect(url_for('home'))  # або показати підтвердження
 
 
