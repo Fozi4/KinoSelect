@@ -114,8 +114,7 @@ def movies():
         for i in range(n):
             for j in range(0, n - i - 1):
                 if movie_list[j].price > movie_list[j + 1].price:
-                    movie_list[j], movie_list[j +
-                                              1] = movie_list[j + 1], movie_list[j]
+                    movie_list[j], movie_list[j + 1] = movie_list[j + 1], movie_list[j]
     elif sort_by == 'title':
         # Сортування за назвою вручну (якщо треба)
         movie_list.sort(key=lambda movie: movie.title.lower())
