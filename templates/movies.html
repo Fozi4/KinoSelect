@@ -1,32 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Movie Selection</title>
-  <link
+  <head>
+    <meta charset="UTF-8" />
+    <title>Movie Selection</title>
+    <link
       rel="stylesheet"
       href="{{  url_for('static', filename='css/moviesStyles.css')  }}"
     />
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/movies.css') }}">
-</head>
-<body>
-  <h1>Available Movies</h1>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/movies.css') }}"
+    />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="kino-select">
+        <a href="{{url_for('home')}}">KinoSelect</a>
+      </div>
+      <ul class="nav-links">
+        <li><a href="{{url_for('contact')}}">Contact</a></li>
+        {% if current_user.is_authenticated %}
+        <span>Welcome, {{ current_user.username }}!</span>
+        <a href="{{ url_for('logout') }}">Logout</a>
+        {% else %}
+        <a href="{{ url_for('login') }}">Login</a>
+        <a href="{{ url_for('signup') }}">Sign Up</a>
+        {% endif %}
+      </ul>
+    </nav>
+    <h1>Available Movies</h1>
 
-  <div class="sort-options">
-    <a href="{{ url_for('movies', sort='price') }}">Sort by Price</a> |
-    <a href="{{ url_for('movies', sort='title') }}">Sort by Title</a>
-  </div>
+    <div class="sort-options">
+      <a href="{{ url_for('movies', sort='price') }}">Sort by Price</a> |
+      <a href="{{ url_for('movies', sort='title') }}">Sort by Title</a>
+    </div>
 
-  <div class="movie-list">
-    {% for movie in movies %}
+    <div class="movie-list">
+      {% for movie in movies %}
       <div class="movie-card">
-        <img src="{{ url_for('static', filename='images/' + movie.image) }}" alt="{{ movie.title }}">
+        <a href="{{ url_for('movieDetails', movie_id=movie.id) }}">
+          <img
+            src="{{ url_for('static', filename='images/' + movie.image) }}"
+            alt="{{ movie.title }}"
+          />
+        </a>
         <h3>{{ movie.title }}</h3>
         <p>Cinema: {{ movie.cinema }}</p>
-        <p>Price: {{ movie.price }}₴</p>
-        <button class="buy-button">Buy Ticket</button>
+        <p>Price: {{ movie.price }}</p>
+        <a
+          class="buy-button"
+          href="{{ url_for('movieDetails', movie_id=movie.id) }}"
+          >Buy Ticket</a
+        >
       </div>
-    {% endfor %}
-  </div>
-</body>
+      {% endfor %}
+    </div>
+  </body>
 </html>

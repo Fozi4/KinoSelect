@@ -11,9 +11,13 @@
         <nav class="navbar">
           <div class="kino-select"><a href="{{url_for('home')}}">KinoSelect</a></div>
           <ul class="nav-links">
-            <li><a href="{{url_for('login')}}">Log In</a></li>
-            <li><a href="{{url_for('signup')}}">Sign up</a></li>
-          </ul>
+            {% if current_user.is_authenticated %}
+            <span>Welcome, {{ current_user.username }}!</span>
+            <a href="{{ url_for('logout') }}">Logout</a>
+          {% else %}
+            <a href="{{ url_for('login') }}">Login</a>
+            <a href="{{ url_for('signup') }}">Sign Up</a>
+          {% endif %}          </ul>
         </nav>
         <div class="contact-container">
             <div class="contact-text">

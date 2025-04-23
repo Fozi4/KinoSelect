@@ -1,0 +1,111 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #1f1f1f;
+  min-height: 100vh;
+  margin: 0;
+  font-family: "Montserrat", sans-serif;
+}
+
+.movie-details-container {
+  max-width: 800px;
+  margin: 60px auto;
+  padding: 30px;
+  background-color: #2c2c2c;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-family: "Montserrat", sans-serif;
+}
+
+.movie-details-container h1 {
+  font-size: 3rem;
+  margin-bottom: 20px;
+  color: #00bfff;
+  text-align: center;
+}
+
+.movie-details-img {
+  display: block;
+  margin: 0 auto 30px;
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.movie-details-container p {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  margin: 10px 0;
+}
+
+.btn {
+  display: inline-block;
+  margin-top: 20px;
+  background-color: #00bfff;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+  background-color: #009acf;
+}
+
+.reserve-form {
+  background-color: rgba(255, 255, 255, 0.05);
+  padding: 20px;
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  margin-top: 30px;
+}
+
+.reserve-form label {
+  color: white;
+  display: block;
+  margin-bottom: 6px;
+  font-weight: bold;
+}
+
+.reserve-form input,
+.reserve-form select {
+  width: 100%;
+  padding: 8px 10px;
+  margin-bottom: 15px;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.reserve-form button {
+  background-color: #00bfff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  font-weight: bold;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.reserve-form button:hover {
+  background-color: #009acf;
+}
+
+.cinema-link {
+  color: #00bfff;
+  text-decoration: underline;
+  font-weight: bold;
+  transition: color 0.3s;
+}
+.cinema-link:hover {
+  color: #009acf;
+}

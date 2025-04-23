@@ -20,8 +20,13 @@
         <ul class="nav-links">
           <li><a href="#films-of-the-day">Films of the day</a></li>
           <li><a href="{{url_for('contact')}}">Contact</a></li>
-          <li><a href="{{url_for('login')}}">Log In</a></li>
-          <li><a href="{{url_for('signup')}}">Sign up</a></li>
+          {% if current_user.is_authenticated %}
+          <span>Welcome, {{ current_user.username }}!</span>
+          <li><a href="{{url_for('logout')}}">Logout</a></li>
+          {% else %}
+          <a href="{{ url_for('login') }}">Login</a>
+          <a href="{{ url_for('signup') }}">Sign Up</a>
+          {% endif %}
         </ul>
       </nav>
       <div class="hero-content">

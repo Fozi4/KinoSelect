@@ -1,27 +1,42 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import current_user, UserMixin, LoginManager, login_required, logout_user, login_user
+from werkzeug.security import check_password_hash
+from flask_bcrypt import bcrypt
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 db = SQLAlchemy(app)
 
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     fullname = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
-    
+
+
 class Movie(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(100), nullable=False)
     cinema = db.Column(db.String(100), nullable=False)
     price = db.Column(db.Float, nullable=False)
-    image = db.Column(db.String(200))  # шлях до картинки
+    image = db.Column(db.String(200))
+    description = db.Column(db.Text, nullable=True)
 
     def __repr__(self):
         return f'<User {self.email}>'
+
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = "login"
+
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 
 @app.route('/')
@@ -50,33 +65,65 @@ def signup():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
+        email = request.form['email']
+        password = request.form['password']
 
-        # Тимчасова перевірка
-        if email and password:  # Тут буде реальна перевірка з бази потім
-            print("Form data: ", request.form)
+        user = User.query.filter_by(email=email).first()
+
+        if user and check_password_hash(user.password, password):
+            login_user(user)
             return redirect(url_for('home'))
         else:
-            return "Invalid email or password", 401
-
+            flash('Invalid email or password', 'danger')
+            return render_template('login.html')
     return render_template('login.html')
+
+
+@app.route('/logout', methods=['GET', 'POST'])
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for('login'))
 
 
 @app.route('/contact')
 def contact():
     return render_template('contact.html')
 
+
 @app.route('/movies')
 def movies():
-    sort_by = request.args.get('sort', 'title')  # сортування за замовчуванням
+    # за замовчуванням сортування за назвою
+    sort_by = request.args.get('sort', 'title')
+    movie_list = Movie.query.all()
+
+    # Bubble sort за ціною
     if sort_by == 'price':
-        movie_list = Movie.query.order_by(Movie.price).all()
+        n = len(movie_list)
+        for i in range(n):
+            for j in range(0, n - i - 1):
+                if movie_list[j].price > movie_list[j + 1].price:
+                    movie_list[j], movie_list[j +
+                                              1] = movie_list[j + 1], movie_list[j]
     elif sort_by == 'title':
-        movie_list = Movie.query.order_by(Movie.title).all()
-    else:
-        movie_list = Movie.query.all()
+        # Сортування за назвою вручну (якщо треба)
+        movie_list.sort(key=lambda movie: movie.title.lower())
     return render_template('movies.html', movies=movie_list)
+
+
+@app.route('/movieDetails/<int:movie_id>')
+def movieDetails(movie_id):
+    movie = Movie.query.get_or_404(movie_id)
+    return render_template('movie_details.html', movie=movie)
+
+
+@app.route('/reserve/<int:movie_id>', methods=['POST'])
+def reserve_ticket(movie_id):
+    name = request.form.get('name')
+    seat = request.form.get('seat')
+    # Тут можна зберігати в базу або просто вивести
+    print(f'{name} забронював(ла) місце {seat} на фільм з ID {movie_id}')
+    return redirect(url_for('home'))  # або показати підтвердження
 
 
 if __name__ == '__main__':
@@ -86,10 +133,10 @@ if __name__ == '__main__':
 # with app.app_context():
     # db.create_all()
 
+
     def __repr__(self):
         return f'<Movie {self.title}>'
 
-with app.app_context():
-    db.create_all()
 
-
+# with app.app_context():
+    # db.create_all()

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>{{ movie.title }} - KinoSelect</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/movieDetailsStyles.css') }}"
+    />
+  </head>
+  <body>
+    <div class="movie-details-container">
+      <h1>{{ movie.title }}</h1>
+      <img
+        src="{{ url_for('static', filename='images/' + movie.image) }}"
+        alt="{{ movie.title }}"
+        class="movie-details-img"
+      />
+      <p><strong>Cinema:</strong><a href="https://www.google.com/maps/search/?api=1&query={{ movie.cinema | urlencode }}" 
+        target="_blank"
+        class="cinema-link"> {{ movie.cinema }} </a></p>
+      <p><strong>Price:</strong> {{ movie.price }} </p>
+      <p><strong>Description:</strong></p>
+      <p>{{ movie.description }}</p>
+      <br /><br />
+      <a href="{{ url_for('movies') }}" class="btn">Back to movies</a>
+    </div>
+    <form action="{{ url_for('reserve_ticket', movie_id=movie.id) }}" method="POST" class="reserve-form">
+      <label for="name">Ваше ім’я:</label>
+      <input type="text" name="name" required>
+    
+      <label for="row">Select Row:</label>
+      <select name="row" required>
+        {% for row in ['A', 'B', 'C', 'D', 'E', 'F'] %}
+          <option value="{{ row }}">{{ row }}</option>
+        {% endfor %}
+      </select>
+    
+      <label for="seat">Select Seat:</label>
+      <select name="seat" required>
+        {% for seat in range(1, 22) %}
+          <option value="{{ seat }}">{{ seat }}</option>
+        {% endfor %}
+      </select>
+    
+      <button type="submit">Зарезервувати квиток</button>
+    </form>
+    </div>
+  </body>
+</html>
