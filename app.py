@@ -14,14 +14,13 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 db = SQLAlchemy(app)
 
 
-
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
     fullname = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(100), nullable=False)
-    
+
     def __repr__(self):
         return f'<User {self.email}>'
 
@@ -33,14 +32,25 @@ class Movie(db.Model):
     price = db.Column(db.Float, nullable=False)
     image = db.Column(db.String(200))
     description = db.Column(db.Text, nullable=True)
-    
+
     def __repr__(self):
         return f'<Movie {self.title}>'
+
+
+class Rezerwacja(db.Model):
+    __tablename__ = 'Rezerwacja'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    row = db.Column(db.String(100), nullable=False)
+    seat = db.Column(db.Integer, nullable=False)
+    film = db.Column(db.Integer, nullable=False)
+# film, sala, godzina, kinoteatr, data_wygasania, data_rezerwacji
 
 
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -61,7 +71,8 @@ def signup():
 
         if fullname and email and password:
             hashed_password = generate_password_hash(password)
-            new_user = User(fullname=fullname, email=email, password=hashed_password)
+            new_user = User(fullname=fullname, email=email,
+                            password=hashed_password)
             db.session.add(new_user)
             db.session.commit()
             print("Form data:", request.form)
@@ -113,7 +124,8 @@ def movies():
         for i in range(n):
             for j in range(0, n - i - 1):
                 if movie_list[j].price > movie_list[j + 1].price:
-                    movie_list[j], movie_list[j + 1] = movie_list[j + 1], movie_list[j]
+                    movie_list[j], movie_list[j +
+                                              1] = movie_list[j + 1], movie_list[j]
     elif sort_by == 'title':
         # Сортування за назвою вручну (якщо треба)
         movie_list.sort(key=lambda movie: movie.title.lower())
@@ -128,26 +140,36 @@ def movieDetails(movie_id):
 
 @app.route('/reserve/<int:movie_id>', methods=['POST'])
 def reserve_ticket(movie_id):
-    name = request.form.get('name')
-    seat = request.form.get('seat')
-    row = request.form.get('row')
+    movie_list = Movie.query.all()
+
+    if request.method == 'POST':
+        name = request.form.get('name')
+        seat = request.form.get('seat')
+        row = request.form.get('row')
+        movie = request.form.get(movie_id)
+        if name and seat and row:
+            new_rezerwacja = Rezerwacja(
+                name=name, seat=seat, row=row, film=movie_id)
+            db.session.add(new_rezerwacja)
+            db.session.commit()
+            print(
+                f'{name} забронював(ла) місце {seat} ряд {row} на фільм з ID {movie_id}')
     # Тут можна зберігати в базу або просто вивести
-    print(f'{name} забронював(ла) місце {seat} ряд {row} на фільм з ID {movie_id}')
-    return redirect(url_for('home'))  # або показати підтвердження
-
-
-#with app.app_context():
-   # User.query.delete()
-    #db.session.commit()
-    #print("Всі користувачі видалені.")
-
-
-if __name__ == '__main__':
-    app.run(debug=True)
+    return render_template('signup.html')  # або показати підтвердження
 
 
 # with app.app_context():
     # db.create_all()
+
+
+# with app.app_context():
+   # User.query.delete()
+    # db.session.commit()
+    # print("Всі користувачі видалені.")
+
+
+if __name__ == '__main__':
+    app.run(debug=True)
 
 
 # with app.app_context():
