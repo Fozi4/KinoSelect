@@ -8,6 +8,15 @@
       href="{{ url_for('static', filename='css/movieDetailsStyles.css') }}"
     />
   </head>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    <ul class="flashes">
+      {% for category, message in messages %}
+        <li class="{{ category }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
   <body>
     <div class="movie-details-container">
       <h1>{{ movie.title }}</h1>
@@ -28,6 +37,13 @@
     <form action="{{ url_for('reserve_ticket', movie_id=movie.id) }}" method="POST" class="reserve-form">
       <label for="name">Your Name:</label>
       <input type="text" name="name" required>
+
+      <label for="hall">Select Hall:</label>
+      <select name="hall" required>
+        {% for hall in ['1', '2', '3', '4'] %}
+          <option value="{{ hall }}">{{ hall }}</option>
+        {% endfor %}
+      </select>
     
       <label for="row">Select Row:</label>
       <select name="row" required>
@@ -42,8 +58,13 @@
           <option value="{{ seat }}">{{ seat }}</option>
         {% endfor %}
       </select>
+
+      <label for="date">Select Date:</label>
+      <input type="date" name="date" required>
+
+      <input type="hidden" name="cinema" value="{{ movie.cinema }}">
     
-      <button type="submit">Зарезервувати квиток</button>
+      <button type="submit">Reserve Ticket</button>
     </form>
     </div>
   </body>

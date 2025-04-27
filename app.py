@@ -1,9 +1,11 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import UniqueConstraint
 from flask_login import current_user, UserMixin, LoginManager, login_required, logout_user, login_user
 from werkzeug.security import check_password_hash, generate_password_hash
 from dotenv import load_dotenv
 import os
+from datetime import datetime, timedelta
 
 load_dotenv()
 app = Flask(__name__)
@@ -39,12 +41,21 @@ class Movie(db.Model):
 
 class Rezerwacja(db.Model):
     __tablename__ = 'Rezerwacja'
-    id = db.Column(db.Integer, primary_key=True)
+
+    id = db.Column(db.Integer, primary_key=True)  # окремий первинний ключ
     name = db.Column(db.String(100), nullable=False)
     row = db.Column(db.String(100), nullable=False)
     seat = db.Column(db.Integer, nullable=False)
     film = db.Column(db.Integer, nullable=False)
-# film, sala, godzina, kinoteatr, data_wygasania, data_rezerwacji
+    sala = db.Column(db.String(100), nullable=False)
+    data_rezerwacji = db.Column(db.Date, nullable=False)
+    data_wygasania = db.Column(db.Date, nullable=False)
+    kinoteatr = db.Column(db.String(100), nullable=False)
+
+    __table_args__ = (
+        UniqueConstraint('row', 'seat', 'film', 'sala',
+                         'data_rezerwacji', name='unique_seat_per_showing'),
+    )
 
 
 login_manager = LoginManager()
@@ -140,22 +151,40 @@ def movieDetails(movie_id):
 
 @app.route('/reserve/<int:movie_id>', methods=['POST'])
 def reserve_ticket(movie_id):
-    movie_list = Movie.query.all()
-
     if request.method == 'POST':
         name = request.form.get('name')
         seat = request.form.get('seat')
         row = request.form.get('row')
-        movie = request.form.get(movie_id)
-        if name and seat and row:
+        sala = request.form.get('hall')
+        date_str = request.form.get('date')
+        date = datetime.strptime(date_str, "%Y-%m-%d").date()
+        kinoteatr = request.form.get('cinema')
+        if not current_user.is_authenticated:
+            flash('You must be logged in to reserve a ticket.',
+                  'error')
+            return redirect(url_for('login'))
+
+        existing_reservation = Rezerwacja.query.filter_by(
+            row=row,
+            seat=seat,
+            film=movie_id,
+            sala=sala,
+            data_rezerwacji=date
+        ).first()
+        if existing_reservation:
+            flash(
+                'This seat is already reserved for the selected date. Please choose another seat.', 'error')
+            return redirect(url_for('movieDetails', movie_id=movie_id))
+
+        if name and seat and row and sala and date and kinoteatr:
             new_rezerwacja = Rezerwacja(
-                name=name, seat=seat, row=row, film=movie_id)
-            db.session.add(new_rezerwacja)
-            db.session.commit()
+                name=name, seat=seat, row=row, film=movie_id, sala=sala, data_rezerwacji=date, data_wygasania=date + timedelta(days=1), kinoteatr=kinoteatr)
             print(
                 f'{name} забронював(ла) місце {seat} ряд {row} на фільм з ID {movie_id}')
-    # Тут можна зберігати в базу або просто вивести
-    return render_template('signup.html')  # або показати підтвердження
+            db.session.add(new_rezerwacja)
+            db.session.commit()
+            flash('Ticket reserved successfully!', 'success')
+            return redirect(url_for('movieDetails', movie_id=movie_id))
 
 
 # with app.app_context():
