@@ -13,6 +13,7 @@
           <ul class="nav-links">
             {% if current_user.is_authenticated %}
             <span>Welcome, {{ current_user.fullname }}!</span>
+            <li><a href="{{ url_for('profile') }}">My Profile</a></li>
             <a href="{{ url_for('logout') }}">Logout</a>
           {% else %}
             <a href="{{ url_for('login') }}">Login</a>

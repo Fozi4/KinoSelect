@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <title>My profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="kino-select"><a href="{{url_for('home')}}">KinoSelect</a></div>
+        <ul class="nav-links">
+            <li><a href="{{url_for('contact')}}">Contact</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+    </nav>
+    <h1>Welcome, {{ current_user.fullname }}!</h1>
+
+    <h2>My reservations.</h2>
+    {% if reservations %}
+        {% for res in reservations %}
+            <div class="reservation">
+                <img src="{{ url_for('static', filename='images/' + res.movie.image) }}" alt="{{ res.movie.title }}">
+                <div class="reservation-details">
+                    <h3>{{ res.movie.title }}</h3>
+                    <p><strong>Cinema:</strong> {{ res.kinoteatr }}, Hall: {{ res.sala }}</p>
+                    <p><strong>Row:</strong> {{ res.row }}-{{ res.seat }}</p>
+                    <p><strong>Date:</strong> {{ res.data_rezerwacji }}</p>
+                    <p><strong>Ticket expiration date:</strong> {{  res.data_wygasania }}</p>
+                    <p><strong>Time:</strong> {{ res.showtime.time.strftime('%H:%M') }}</p>
+                    <form method="POST" action="{{ url_for('cancel_reservation', reservation_id=res.id) }}">
+                        <button type="submit" class="cancel-btn">Cancel reservation</button>
+                    </form>
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p>You dont have any reservations.</p>
+    {% endif %}
+
+</body>
+</html>

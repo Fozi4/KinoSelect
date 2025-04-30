@@ -1,11 +1,12 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import relationship
 from sqlalchemy import UniqueConstraint
 from flask_login import current_user, UserMixin, LoginManager, login_required, logout_user, login_user
 from werkzeug.security import check_password_hash, generate_password_hash
 from dotenv import load_dotenv
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 
 load_dotenv()
 app = Flask(__name__)
@@ -41,21 +42,37 @@ class Movie(db.Model):
 
 class Rezerwacja(db.Model):
     __tablename__ = 'Rezerwacja'
-
-    id = db.Column(db.Integer, primary_key=True)  # окремий первинний ключ
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     row = db.Column(db.String(100), nullable=False)
     seat = db.Column(db.Integer, nullable=False)
-    film = db.Column(db.Integer, nullable=False)
+    film = db.Column(db.Integer, db.ForeignKey('movie.id'), nullable=False)
     sala = db.Column(db.String(100), nullable=False)
     data_rezerwacji = db.Column(db.Date, nullable=False)
     data_wygasania = db.Column(db.Date, nullable=False)
     kinoteatr = db.Column(db.String(100), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    showtime_id = db.Column(db.Integer, db.ForeignKey(
+        'show_time.id'), nullable=False)
+    showtime = db.relationship('ShowTime')
+    movie = db.relationship('Movie', backref='reservations')
 
     __table_args__ = (
         UniqueConstraint('row', 'seat', 'film', 'sala',
-                         'data_rezerwacji', name='unique_seat_per_showing'),
+                         'data_rezerwacji', 'showtime_id', name='unique_seat_per_showing'),
     )
+
+
+class ShowTime(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    time = db.Column(db.Time, nullable=False)
+    movie_id = db.Column(db.Integer, db.ForeignKey('movie.id'), nullable=False)
+
+    movie = db.relationship(
+        'Movie', backref=db.backref('showtimes', lazy=True))
+
+    def __repr__(self):
+        return f'<ShowTime {self.time} for Movie {self.movie.title}>'
 
 
 login_manager = LoginManager()
@@ -159,6 +176,7 @@ def reserve_ticket(movie_id):
         date_str = request.form.get('date')
         date = datetime.strptime(date_str, "%Y-%m-%d").date()
         kinoteatr = request.form.get('cinema')
+        showtime_id = int(request.form.get('showtime_id'))
         if not current_user.is_authenticated:
             flash('You must be logged in to reserve a ticket.',
                   'error')
@@ -176,9 +194,18 @@ def reserve_ticket(movie_id):
                 'This seat is already reserved for the selected date. Please choose another seat.', 'error')
             return redirect(url_for('movieDetails', movie_id=movie_id))
 
-        if name and seat and row and sala and date and kinoteatr:
+        if name and seat and row and sala and date and kinoteatr and showtime_id:
             new_rezerwacja = Rezerwacja(
-                name=name, seat=seat, row=row, film=movie_id, sala=sala, data_rezerwacji=date, data_wygasania=date + timedelta(days=1), kinoteatr=kinoteatr)
+                name=name,
+                seat=seat,
+                row=row,
+                film=movie_id,
+                sala=sala,
+                data_rezerwacji=date,
+                data_wygasania=date + timedelta(days=1),
+                kinoteatr=kinoteatr,
+                showtime_id=showtime_id,
+                user_id=current_user.id)
             print(
                 f'{name} забронював(ла) місце {seat} ряд {row} на фільм з ID {movie_id}')
             db.session.add(new_rezerwacja)
@@ -187,8 +214,41 @@ def reserve_ticket(movie_id):
             return redirect(url_for('movieDetails', movie_id=movie_id))
 
 
-# with app.app_context():
-    # db.create_all()
+@app.route('/profile')
+@login_required
+def profile():
+    reservations = Rezerwacja.query.filter_by(user_id=current_user.id).all()
+
+    for res in reservations:
+        res.movie = Movie.query.get(res.film)
+
+    return render_template('profile.html', reservations=reservations)
+
+
+@app.route('/cancel_reservation/<int:reservation_id>', methods=['POST'])
+@login_required
+def cancel_reservation(reservation_id):
+    reservation = Rezerwacja.query.get_or_404(reservation_id)
+
+    if reservation.name != current_user.fullname:
+        flash("You can't cancell the reservation.", 'error')
+        return redirect(url_for('profile'))
+
+    db.session.delete(reservation)
+    db.session.commit()
+    flash('Reservation cancelled succesfully!', 'success')
+    return redirect(url_for('profile'))
+
+
+with app.app_context():
+    movies = Movie.query.all()
+    times = [time(12, 0), time(15, 0), time(18, 0), time(21, 0)]
+
+    for movie in movies:
+        for t in times:
+            showtime = ShowTime(time=t, movie_id=movie.id)
+            db.session.add(showtime)
+    db.session.commit()
 
 
 # with app.app_context():
@@ -196,10 +256,9 @@ def reserve_ticket(movie_id):
     # db.session.commit()
     # print("Всі користувачі видалені.")
 
+# with app.app_context():
+#     db.create_all()
+
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
-# with app.app_context():
-    # db.create_all()

@@ -62,6 +62,13 @@
       <label for="date">Select Date:</label>
       <input type="date" name="date" required>
 
+      <label for="showtime">Select Time:</label>
+    <select name="showtime_id" id="showtime">
+        {% for showtime in movie.showtimes %}
+            <option value="{{ showtime.id }}">{{ showtime.time.strftime('%H:%M') }}</option>
+        {% endfor %}
+    </select>
+
       <input type="hidden" name="cinema" value="{{ movie.cinema }}">
     
       <button type="submit">Reserve Ticket</button>
