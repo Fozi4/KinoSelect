@@ -60,7 +60,7 @@
       </select>
 
       <label for="date">Select Date:</label>
-      <input type="date" name="date" required>
+      <input type="date" name="date" min="{{ datetime.today().date() }}" required>
 
       <label for="showtime">Select Time:</label>
     <select name="showtime_id" id="showtime">

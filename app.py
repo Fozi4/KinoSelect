@@ -6,7 +6,7 @@ from flask_login import current_user, UserMixin, LoginManager, login_required, l
 from werkzeug.security import check_password_hash, generate_password_hash
 from dotenv import load_dotenv
 import os
-from datetime import datetime, timedelta, time
+from datetime import datetime, timedelta
 
 load_dotenv()
 app = Flask(__name__)
@@ -15,6 +15,8 @@ app.config['SESSION_PERMANENT'] = False
 print("SECRET_KEY = ", os.getenv("SECRET_KEY"))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 db = SQLAlchemy(app)
+
+# User model for storing user data
 
 
 class User(db.Model, UserMixin):
@@ -27,6 +29,8 @@ class User(db.Model, UserMixin):
     def __repr__(self):
         return f'<User {self.email}>'
 
+# Movie model for storing movie details
+
 
 class Movie(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -38,6 +42,8 @@ class Movie(db.Model):
 
     def __repr__(self):
         return f'<Movie {self.title}>'
+
+# Reservation model
 
 
 class Rezerwacja(db.Model):
@@ -54,13 +60,16 @@ class Rezerwacja(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     showtime_id = db.Column(db.Integer, db.ForeignKey(
         'show_time.id'), nullable=False)
+    # Relationships
     showtime = db.relationship('ShowTime')
     movie = db.relationship('Movie', backref='reservations')
-
+    #  Ensure unique seat per showing
     __table_args__ = (
         UniqueConstraint('row', 'seat', 'film', 'sala',
                          'data_rezerwacji', 'showtime_id', name='unique_seat_per_showing'),
     )
+
+# Showtime model for movie screening times
 
 
 class ShowTime(db.Model):
@@ -75,19 +84,26 @@ class ShowTime(db.Model):
         return f'<ShowTime {self.time} for Movie {self.movie.title}>'
 
 
+# Initialize login manager
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = "login"
+
+# Load user by ID
 
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+# Home page / Link for a home page
+
 
 @app.route('/')
 def home():
     return render_template('index.html')
+
+# User signup function
 
 
 @app.route('/signup', methods=['GET', 'POST'])
@@ -106,8 +122,10 @@ def signup():
             print("Form data:", request.form)
             return redirect(url_for('home'))
         else:
-            return 'Будь ласка, заповни всі поля!'
+            return 'Plesse fill everything!'
     return render_template('signup.html')
+
+# User login function
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -127,6 +145,8 @@ def login():
             return render_template('login.html')
     return render_template('login.html')
 
+# logout. Works only if user logged in
+
 
 @app.route('/logout', methods=['GET', 'POST'])
 @login_required
@@ -134,19 +154,22 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
+# Contact Page
+
 
 @app.route('/contact')
 def contact():
     return render_template('contact.html')
 
+# Movies page, where displayed can find all the films
+
 
 @app.route('/movies')
 def movies():
-    # за замовчуванням сортування за назвою
     sort_by = request.args.get('sort', 'title')
     movie_list = Movie.query.all()
 
-    # Bubble sort за ціною
+    # Bubble sort
     if sort_by == 'price':
         n = len(movie_list)
         for i in range(n):
@@ -155,15 +178,19 @@ def movies():
                     movie_list[j], movie_list[j +
                                               1] = movie_list[j + 1], movie_list[j]
     elif sort_by == 'title':
-        # Сортування за назвою вручну (якщо треба)
+        # Sort by title.
         movie_list.sort(key=lambda movie: movie.title.lower())
     return render_template('movies.html', movies=movie_list)
+
+# Movie details page.
 
 
 @app.route('/movieDetails/<int:movie_id>')
 def movieDetails(movie_id):
     movie = Movie.query.get_or_404(movie_id)
-    return render_template('movie_details.html', movie=movie)
+    return render_template('movie_details.html', movie=movie, datetime=datetime)
+
+# Reserve ticket for a movie. Can't make reservation if reservation is already exist
 
 
 @app.route('/reserve/<int:movie_id>', methods=['POST'])
@@ -175,6 +202,9 @@ def reserve_ticket(movie_id):
         sala = request.form.get('hall')
         date_str = request.form.get('date')
         date = datetime.strptime(date_str, "%Y-%m-%d").date()
+        if date < datetime.today().date():
+            flash('You cannot reserve a ticket for a past date.', 'error')
+            return redirect(url_for('movieDetails', movie_id=movie_id))
         kinoteatr = request.form.get('cinema')
         showtime_id = int(request.form.get('showtime_id'))
         if not current_user.is_authenticated:
@@ -193,7 +223,7 @@ def reserve_ticket(movie_id):
             flash(
                 'This seat is already reserved for the selected date. Please choose another seat.', 'error')
             return redirect(url_for('movieDetails', movie_id=movie_id))
-
+            # Creating a reservatiion, and adding to database
         if name and seat and row and sala and date and kinoteatr and showtime_id:
             new_rezerwacja = Rezerwacja(
                 name=name,
@@ -206,23 +236,32 @@ def reserve_ticket(movie_id):
                 kinoteatr=kinoteatr,
                 showtime_id=showtime_id,
                 user_id=current_user.id)
-            print(
-                f'{name} забронював(ла) місце {seat} ряд {row} на фільм з ID {movie_id}')
+
             db.session.add(new_rezerwacja)
             db.session.commit()
             flash('Ticket reserved successfully!', 'success')
             return redirect(url_for('movieDetails', movie_id=movie_id))
 
+# Profile page where you can find your reservations and cancel them.
+
 
 @app.route('/profile')
 @login_required
 def profile():
+    today = datetime.today().date()
+    expired_reservations = Rezerwacja.query.filter(  # deleting reservation from profile, if reservation is expired.
+        Rezerwacja.data_wygasania < today,
+        Rezerwacja.user_id == current_user.id
+    ).all()
+
+    for res in expired_reservations:
+        db.session.delete(res)
+    db.session.commit()
+
     reservations = Rezerwacja.query.filter_by(user_id=current_user.id).all()
-
-    for res in reservations:
-        res.movie = Movie.query.get(res.film)
-
     return render_template('profile.html', reservations=reservations)
+
+# Cancel reservation function.
 
 
 @app.route('/cancel_reservation/<int:reservation_id>', methods=['POST'])
@@ -240,25 +279,6 @@ def cancel_reservation(reservation_id):
     return redirect(url_for('profile'))
 
 
-with app.app_context():
-    movies = Movie.query.all()
-    times = [time(12, 0), time(15, 0), time(18, 0), time(21, 0)]
-
-    for movie in movies:
-        for t in times:
-            showtime = ShowTime(time=t, movie_id=movie.id)
-            db.session.add(showtime)
-    db.session.commit()
-
-
-# with app.app_context():
-   # User.query.delete()
-    # db.session.commit()
-    # print("Всі користувачі видалені.")
-
-# with app.app_context():
-#     db.create_all()
-
-
+# Starting app.
 if __name__ == '__main__':
     app.run(debug=True)
