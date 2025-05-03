@@ -6,7 +6,7 @@ from flask_login import current_user, UserMixin, LoginManager, login_required, l
 from werkzeug.security import check_password_hash, generate_password_hash
 from dotenv import load_dotenv
 import os
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
 
 load_dotenv()
 app = Flask(__name__)
@@ -82,6 +82,20 @@ class ShowTime(db.Model):
 
     def __repr__(self):
         return f'<ShowTime {self.time} for Movie {self.movie.title}>'
+
+
+class History(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    movie_id = db.Column(db.Integer, db.ForeignKey('movie.id'), nullable=False)
+    showtime_id = db.Column(db.Integer, db.ForeignKey(
+        'show_time.id'), nullable=False)
+    data_rezerwacji = db.Column(db.Date, nullable=False)
+    kinoteatr = db.Column(db.String(100), nullable=False)
+
+    showtime = db.relationship('ShowTime', backref='histories')
+    movie = db.relationship('Movie', backref='histories')
+    user = db.relationship('User', backref='histories')
 
 
 # Initialize login manager
@@ -237,7 +251,16 @@ def reserve_ticket(movie_id):
                 showtime_id=showtime_id,
                 user_id=current_user.id)
 
+            add_to_history = History(
+                user_id=current_user.id,
+                movie_id=movie_id,
+                showtime_id=showtime_id,
+                data_rezerwacji=date,
+                kinoteatr=kinoteatr
+            )
+
             db.session.add(new_rezerwacja)
+            db.session.add(add_to_history)
             db.session.commit()
             flash('Ticket reserved successfully!', 'success')
             return redirect(url_for('movieDetails', movie_id=movie_id))
@@ -277,6 +300,31 @@ def cancel_reservation(reservation_id):
     db.session.commit()
     flash('Reservation cancelled succesfully!', 'success')
     return redirect(url_for('profile'))
+
+# History function. basicly we're just going through the data base, and show it in the page.
+
+
+@app.route('/history')
+@login_required
+def history():
+    user_id = current_user.id
+    history_records = History.query.filter_by(user_id=user_id).all()
+    return render_template('history.html', histories=history_records)
+
+
+# Creating a tables, that are not created yet.
+# with app.app_context():
+#     db.create_all()
+
+# with app.app_context():
+#     movies = Movie.query.all()
+#     times = [time(12, 0), time(15, 0), time(18, 0), time(21, 0)]
+
+#     for movie in movies:
+#         for t in times:
+#             showtime = ShowTime(time=t, movie_id=movie.id)
+#             db.session.add(showtime)
+#     db.session.commit()
 
 
 # Starting app.

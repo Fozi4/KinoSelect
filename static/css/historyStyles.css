@@ -1,0 +1,88 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: black;
+    margin: 0;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 30px;
+    cursor: default;
+}
+
+.history-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.history-record {
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    overflow: hidden;
+    cursor: default;
+    transition: transform 0.2s;
+}
+
+.history-record:hover {
+    transform: translateY(-5px);
+}
+
+.history-record img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.history-record h3 {
+    margin: 15px;
+    font-size: 18px;
+    color: #333;
+    cursor: default;
+}
+
+.history-record p {
+    margin: 0 15px 15px 15px;
+    color: #555;
+    font-size: 14px;
+    cursor: default;
+}
+
+.no-history {
+    text-align: center;
+    color: #777;
+    font-size: 16px;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 30px;
+    background-color: #222;
+    position: relative;
+    z-index: 2;
+  }
+  
+  .nav-links {
+    list-style: none;
+    display: flex;
+    gap: 20px;
+  }
+  
+  .nav-links a {
+    color: #00bfff;
+    text-decoration: none;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  
+  .kino-select {
+    font-weight: bold;
+    font-size: 33px;
+    color: #00bfff;
+    font-style: italic;
+    cursor: default;
+  }
