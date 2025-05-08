@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>History</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/historyStyles.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="kino-select"><a href="{{url_for('home')}}">KinoSelect</a></div>
+        <ul class="nav-links">
+            <li><a href="{{  url_for('profile')  }}">Profile</a></li>
+            <li><a href="{{url_for('contact')}}">Contact</a></li>
+            <li><a href="{{ url_for('logout') }}">Logout</a></li>
+        </ul>
+    </nav>
+    <h1>My Reservation History</h1>
+
+    {% if histories %}
+    <div class="history-container">
+        {% for h in histories %}
+        <div class="history-record">
+            <img src="{{ url_for('static', filename='images/' + h.movie.image) }}" alt="{{ h.movie.title }}">
+            <h3>{{ h.movie.title }}</h3>
+            <p><strong>Date of reservation:</strong> {{ h.data_rezerwacji }}</p>
+            <p><strong>Cinema:</strong> {{ h.kinoteatr }}</p>
+            <p><strong>Showtime:</strong> {{ h.showtime.time.strftime('%H:%M') }}</p>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+        <p class="no-history">You have no reservation history.</p>
+    {% endif %}
+</body>
+</html>

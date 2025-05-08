@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Movie</title>
+    <link
+      rel="stylesheet"
+      href="{{  url_for('static', filename='css/styles.css')  }}"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <header class="main-page">
+      <nav class="navbar">
+        <div class="kino-select">KinoSelect</div>
+        <ul class="nav-links">
+          <li><a href="#films-of-the-day">Films of the day</a></li>
+          <li><a href="{{url_for('contact')}}">Contact</a></li>
+          {% if current_user.is_authenticated %}
+          <span>Welcome, {{ current_user.fullname }}!</span>
+          <li><a href="{{ url_for('profile') }}">My Profile</a></li>
+          <li><a href="{{url_for('logout')}}">Logout</a></li>
+          {% else %}
+          <a href="{{ url_for('login') }}">Login</a>
+          <a href="{{ url_for('signup') }}">Sign Up</a>
+          {% endif %}
+        </ul>
+      </nav>
+      <div class="hero-content">
+        <h1>CHOOSE YOUR FILM</h1>
+        <p>Hungry for some films? Click on the button.</p>
+        <a class="btn" href="{{ url_for('movies') }}">Search for Films</a>
+      </div>
+    </header>
+  </body>
+</html>

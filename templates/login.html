@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Log In</title>
+    <link
+      rel="stylesheet"
+      href="{{url_for('static', filename='css/signupAndloginStyles.css')}}"
+    />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="kino-select">
+        <a href="{{url_for('home')}}">KinoSelect</a>
+      </div>
+      <ul class="nav-links">
+        <li><a href="{{url_for('contact')}}">Contact</a></li>
+      </ul>
+    </nav>
+    <div class="auth-page">
+      <div class="auth-container">
+        <h2>Log In</h2>
+        <form action="{{url_for('login')}}" method="POST">
+          <input type="email" placeholder="Email" name="email" required />
+          <input
+            type="password"
+            placeholder="Password"
+            name="password"
+            required
+          />
+          <button type="submit">Log In</button>
+          <p>
+            Don't have an account? <a href="{{url_for('signup')}}">Sign up</a>
+          </p>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>
