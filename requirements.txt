@@ -4,5 +4,3 @@ gunicorn
 flask_login
 dotenv
 datetime
-werkzeug.security
-os
