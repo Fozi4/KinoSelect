@@ -15,6 +15,8 @@ app.config['SESSION_PERMANENT'] = False
 print("SECRET_KEY = ", os.getenv("SECRET_KEY"))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 db = SQLAlchemy(app)
+port = int(os.environ.get('PORT', 5000))
+app.run(host='0.0.0.0', port=port)
 
 # User model for storing user data
 
