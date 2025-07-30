@@ -1,0 +1,8 @@
+# Created by pytest automatically.
+# Exclude Python cache
+__pycache__/
+*.pyc
+
+# Exclude environment files
+.env
+.env.*
