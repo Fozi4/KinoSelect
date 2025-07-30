@@ -18,6 +18,7 @@
       <nav class="navbar">
         <div class="kino-select">KinoSelect</div>
         <ul class="nav-links">
+          <li><a href="#films-of-the-day">Films of the day</a></li>
           <li><a href="{{url_for('contact')}}">Contact</a></li>
           {% if current_user.is_authenticated %}
           <span>Welcome, {{ current_user.fullname }}!</span>
