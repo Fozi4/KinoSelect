@@ -6,3 +6,6 @@ __pycache__/
 # Exclude environment files
 .env
 .env.*
+
+# Exclude Python test cache
+.pytest_cache/
