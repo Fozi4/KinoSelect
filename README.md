@@ -5,15 +5,15 @@ It allows users to register, log in, browse movies, reserve seats, view booking 
 
 ---
 
-## 🎬 Live Demo
+##  Live Demo
 
 Deployed on [Render](https://kinoselect.onrender.com/)  
-👉 **Link:** [https://kinoselect.onrender.com/](https://kinoselect.onrender.com/)  
+ **Link:** [https://kinoselect.onrender.com/](https://kinoselect.onrender.com/)  
 > Make sure to set `SECRET_KEY` in Render's environment settings.
 
 ---
 
-## 🛠️ Technologies Used
+##  Technologies Used
 
 - **Python 3.12**
 - **Flask** – Web framework
@@ -26,7 +26,7 @@ Deployed on [Render](https://kinoselect.onrender.com/)
 
 ---
 
-## ⚙️ Installation & Setup
+##  Installation & Setup
 
 ### 1. Clone the repository
 
