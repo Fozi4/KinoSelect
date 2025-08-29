@@ -210,61 +210,61 @@ def movieDetails(movie_id):
 
 @app.route('/reserve/<int:movie_id>', methods=['POST'])
 def reserve_ticket(movie_id):
-    if request.method == 'POST':
-        name = request.form.get('name')
-        seat = request.form.get('seat')
-        row = request.form.get('row')
-        sala = request.form.get('hall')
-        date_str = request.form.get('date')
-        date = datetime.strptime(date_str, "%Y-%m-%d").date()
-        if date < datetime.today().date():
-            flash('You cannot reserve a ticket for a past date.', 'error')
-            return redirect(url_for('movieDetails', movie_id=movie_id))
-        kinoteatr = request.form.get('cinema')
-        showtime_id = int(request.form.get('showtime_id'))
-        if not current_user.is_authenticated:
-            flash('You must be logged in to reserve a ticket.',
-                  'error')
-            return redirect(url_for('login'))
 
-        existing_reservation = Rezerwacja.query.filter_by(
-            row=row,
+    name = request.form.get('name')
+    seat = request.form.get('seat')
+    row = request.form.get('row')
+    sala = request.form.get('hall')
+    date_str = request.form.get('date')
+    date = datetime.strptime(date_str, "%Y-%m-%d").date()
+    if date < datetime.today().date():
+        flash('You cannot reserve a ticket for a past date.', 'error')
+        return redirect(url_for('movieDetails', movie_id=movie_id))
+    kinoteatr = request.form.get('cinema')
+    showtime_id = int(request.form.get('showtime_id'))
+    if not current_user.is_authenticated:
+        flash('You must be logged in to reserve a ticket.',
+              'error')
+        return redirect(url_for('login'))
+
+    existing_reservation = Rezerwacja.query.filter_by(
+        row=row,
+        seat=seat,
+        film=movie_id,
+        sala=sala,
+        data_rezerwacji=date
+    ).first()
+    if existing_reservation:
+        flash(
+            'This seat is already reserved for the selected date. Please choose another seat.', 'error')
+        return redirect(url_for('movieDetails', movie_id=movie_id))
+        # Creating a reservatiion, and adding to database
+    if name and seat and row and sala and date and kinoteatr and showtime_id:
+        new_rezerwacja = Rezerwacja(
+            name=name,
             seat=seat,
+            row=row,
             film=movie_id,
             sala=sala,
-            data_rezerwacji=date
-        ).first()
-        if existing_reservation:
-            flash(
-                'This seat is already reserved for the selected date. Please choose another seat.', 'error')
-            return redirect(url_for('movieDetails', movie_id=movie_id))
-            # Creating a reservatiion, and adding to database
-        if name and seat and row and sala and date and kinoteatr and showtime_id:
-            new_rezerwacja = Rezerwacja(
-                name=name,
-                seat=seat,
-                row=row,
-                film=movie_id,
-                sala=sala,
-                data_rezerwacji=date,
-                data_wygasania=date + timedelta(days=1),
-                kinoteatr=kinoteatr,
-                showtime_id=showtime_id,
-                user_id=current_user.id)
+            data_rezerwacji=date,
+            data_wygasania=date + timedelta(days=1),
+            kinoteatr=kinoteatr,
+            showtime_id=showtime_id,
+            user_id=current_user.id)
 
-            add_to_history = History(
-                user_id=current_user.id,
-                movie_id=movie_id,
-                showtime_id=showtime_id,
-                data_rezerwacji=date,
-                kinoteatr=kinoteatr
-            )
+        add_to_history = History(
+            user_id=current_user.id,
+            movie_id=movie_id,
+            showtime_id=showtime_id,
+            data_rezerwacji=date,
+            kinoteatr=kinoteatr
+        )
 
-            db.session.add(new_rezerwacja)
-            db.session.add(add_to_history)
-            db.session.commit()
-            flash('Ticket reserved successfully!', 'success')
-            return redirect(url_for('movieDetails', movie_id=movie_id))
+        db.session.add(new_rezerwacja)
+        db.session.add(add_to_history)
+        db.session.commit()
+        flash('Ticket reserved successfully!', 'success')
+        return redirect(url_for('movieDetails', movie_id=movie_id))
 
 # Profile page where you can find your reservations and cancel them.
 
@@ -329,5 +329,5 @@ def history():
 
 
 # Starting app.
-# if __name__ == '__main__':
-    # app.run(debug=True)
+if __name__ == '__main__':
+    app.run(debug=True)
